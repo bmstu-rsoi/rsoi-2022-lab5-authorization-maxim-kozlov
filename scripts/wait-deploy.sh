@@ -1,0 +1,2 @@
+export WAIT_HOSTS=http://gateway.maxim-kozlov.cloud.okteto.net,http://bonus.maxim-kozlov.cloud.okteto.net,http://ticket.maxim-kozlov.cloud.okteto.net,http://flight.maxim-kozlov.cloud.okteto.net
+./scripts/wait-script.sh
