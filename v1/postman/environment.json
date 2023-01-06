@@ -4,32 +4,32 @@
 	"values": [
 		{
 			"key": "serviceUrl",
-			"value": "",
+			"value": "https://load-blancer-maxim-kozlov.cloud.okteto.net",
 			"enabled": true
 		},
 		{
 			"key": "identityProviderUrl",
-			"value": "",
+			"value": "https://dev-sphs8dd1u60odt1f.us.auth0.com",
 			"enabled": true
 		},
 		{
 			"key": "username",
-			"value": "",
+			"value": "tdv38532@nezid.com",
 			"enabled": true
 		},
 		{
 			"key": "password",
-			"value": "",
+			"value": "123456refsdsAnj7",
 			"enabled": true
 		},
 		{
 			"key": "clientId",
-			"value": "",
+			"value": "0oa7ussip5BwhT4Zq5d7",
 			"enabled": true
 		},
 		{
 			"key": "clientSecret",
-			"value": "",
+			"value": "sKNJPKqKSi0cBRp86ihPOdJbRfzYOdfTd5lAp7ha",
 			"enabled": true
 		}
 	],
