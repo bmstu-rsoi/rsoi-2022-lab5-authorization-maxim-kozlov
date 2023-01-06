@@ -3,9 +3,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Http;
 using System.Net.Mime;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using FlightBooking.BonusService.Dto;
 using FlightBooking.Gateway.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -13,6 +15,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace FlightBooking.Gateway.Controllers;
 
+[Authorize]
 [ApiController]
 [Produces(MediaTypeNames.Application.Json)]
 [Route("/api/v1/privilege")]
@@ -36,8 +39,12 @@ public class PrivilegeController: ControllerBase
     [SwaggerResponse(statusCode: StatusCodes.Status200OK, type: typeof(PrivilegeDto), description: "Данные о бонусном счете.")]
     [SwaggerResponse(statusCode: StatusCodes.Status403Forbidden, description: "Пользователь не найден.")]
     [SwaggerResponse(statusCode: StatusCodes.Status500InternalServerError, description: "Ошибка на стороне сервера.")]
-    public async Task<IActionResult> Get([Required, FromHeader(Name = "X-User-Name")] string username)
+    public async Task<IActionResult> Get()
     {
+        var username = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrWhiteSpace(username))
+            return BadRequest("Invalid username");
+        
         try
         {
             var response = await _privilegeRepository.GetAsync(username, needHistory: true);

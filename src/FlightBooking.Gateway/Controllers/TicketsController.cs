@@ -11,11 +11,14 @@ using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 using System.Net.Http;
+using System.Security.Claims;
 using AutoMapper;
 using FlightBooking.Gateway.Domain;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FlightBooking.Gateway.Controllers;
 
+[Authorize]
 [ApiController]
 [Produces(MediaTypeNames.Application.Json)]
 [Route("/api/v1/tickets")]
@@ -41,8 +44,12 @@ public class TicketsController: ControllerBase
     [SwaggerResponse(statusCode: StatusCodes.Status200OK, type: typeof(TicketResponse[]), description: "Список билетов пользователя.")]
     [SwaggerResponse(statusCode: StatusCodes.Status403Forbidden, description: "Пользователь не найден.")]
     [SwaggerResponse(statusCode: StatusCodes.Status500InternalServerError, description: "Ошибка на стороне сервера.")]
-    public async Task<IActionResult> GetAll([Required, FromHeader(Name = "X-User-Name")] string username)
+    public async Task<IActionResult> GetAll()
     {
+        var username = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrWhiteSpace(username))
+            return BadRequest("Invalid username");
+        
         try
         {
             var tickets = await _ticketsService.GetAllAsync(username);
@@ -66,8 +73,12 @@ public class TicketsController: ControllerBase
     [SwaggerResponse(statusCode: StatusCodes.Status403Forbidden, description: "Пользователь не найден.")]
     [SwaggerResponse(statusCode: StatusCodes.Status404NotFound, description: "Билет не найден.")]
     [SwaggerResponse(statusCode: StatusCodes.Status500InternalServerError, description: "Ошибка на стороне сервера.")]
-    public async Task<IActionResult> Get([Required, FromHeader(Name = "X-User-Name")] string username, Guid ticketUid)
+    public async Task<IActionResult> Get(Guid ticketUid)
     {
+        var username = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrWhiteSpace(username))
+            return BadRequest("Invalid username");
+        
         try
         {
             var ticket = await _ticketsService.GetAsync(username, ticketUid);
@@ -96,8 +107,12 @@ public class TicketsController: ControllerBase
     [SwaggerResponse(statusCode: StatusCodes.Status404NotFound, description: "Рейс не найден.")]
     [SwaggerResponse(statusCode: StatusCodes.Status409Conflict, description: "Нет билетов на рейс.")]
     [SwaggerResponse(statusCode: StatusCodes.Status500InternalServerError, description: "Ошибка на стороне сервера.")]
-    public async Task<IActionResult> Purchase([Required, FromHeader(Name = "X-User-Name")] string username, [FromBody] TicketPurchaseRequest request)
+    public async Task<IActionResult> Purchase([FromBody] TicketPurchaseRequest request)
     {
+        var username = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrWhiteSpace(username))
+            return BadRequest("Invalid username");
+        
         try
         {
             if (!ModelState.IsValid)
@@ -128,8 +143,12 @@ public class TicketsController: ControllerBase
     [SwaggerResponse(statusCode: StatusCodes.Status403Forbidden, description: "Пользователь не найден.")]
     [SwaggerResponse(statusCode: StatusCodes.Status404NotFound, description: "Билет не найден.")]
     [SwaggerResponse(statusCode: StatusCodes.Status500InternalServerError, description: "Ошибка на стороне сервера.")]
-    public async Task<IActionResult> Delete([Required, FromHeader(Name = "X-User-Name")] string username, Guid ticketUid)
+    public async Task<IActionResult> Delete(Guid ticketUid)
     {
+        var username = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrWhiteSpace(username))
+            return BadRequest("Invalid username");
+        
         try
         {
             await _ticketsService.DeleteAsync(username, ticketUid);

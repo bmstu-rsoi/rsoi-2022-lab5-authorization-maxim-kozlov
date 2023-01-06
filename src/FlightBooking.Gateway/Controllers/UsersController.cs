@@ -3,10 +3,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Http;
 using System.Net.Mime;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using FlightBooking.Gateway.Domain;
 using FlightBooking.Gateway.Dto.Users;
 using FlightBooking.Gateway.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -14,6 +16,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace FlightBooking.Gateway.Controllers;
 
+[Authorize]
 [ApiController]
 [Produces(MediaTypeNames.Application.Json)]
 [Route("/api/v1/")]
@@ -39,8 +42,12 @@ public class UsersController : ControllerBase
     [SwaggerResponse(statusCode: StatusCodes.Status200OK, type: typeof(UserInfoResponse), description: "Пользователь найден.")]
     [SwaggerResponse(statusCode: StatusCodes.Status404NotFound, description: "Пользователь не найден.")]
     [SwaggerResponse(statusCode: StatusCodes.Status500InternalServerError, description: "Ошибка на стороне сервера.")]
-    public async Task<IActionResult> Get([Required, FromHeader(Name = "X-User-Name")] string username)
+    public async Task<IActionResult> Get()
     {
+        var username = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrWhiteSpace(username))
+            return BadRequest("Invalid username");
+        
         try
         {
             var response = new UserInfoResponse();

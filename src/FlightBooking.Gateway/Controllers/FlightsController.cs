@@ -6,6 +6,7 @@ using System.Net.Mime;
 using System.Threading.Tasks;
 using FlightBooking.FlightService.Dto;
 using FlightBooking.Gateway.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace FlightBooking.Gateway.Controllers;
 
 [ApiController]
+[Authorize]
 [Produces(MediaTypeNames.Application.Json)]
 [Route("/api/v1/flights")]
 public class FlightsController : ControllerBase

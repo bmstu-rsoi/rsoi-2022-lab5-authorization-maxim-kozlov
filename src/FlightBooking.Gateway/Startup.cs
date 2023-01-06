@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
+using FlightBooking.Gateway.Auth;
 using FlightBooking.Gateway.Domain;
 using FlightBooking.Gateway.Repositories;
 using Microsoft.AspNetCore.Builder;
@@ -15,6 +16,8 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
 using Polly;
 using Polly.Extensions.Http;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Logging;
 
 namespace FlightBooking.Gateway;
 
@@ -44,6 +47,7 @@ public class Startup
 
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         services.AddEndpointsApiExplorer();
+
         services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo {Title = "FlightBooking.Gateway", Version = "v1"});
@@ -52,6 +56,31 @@ public class Startup
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
             if (File.Exists(xmlPath))
                 c.IncludeXmlComments(xmlPath);
+            
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "JSON Web Token based security",
+            });
+            
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    new string[] {}
+                }
+            });
         });
 
         // register http services
@@ -71,6 +100,20 @@ public class Startup
             .AddPolicyHandler(GetCircuitBreakerPolicy());
         
         services.AddScoped<ITicketsService, TicketsService>();
+        
+        services.Configure<JwtConfiguration>(Configuration.GetSection("JwtConfiguration"));
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(options =>
+        {
+            options.Authority = Configuration.GetValue<string>("JwtConfiguration:Issuer");
+            options.Audience = Configuration.GetValue<string>("JwtConfiguration:Audience");
+        });
+        services.AddAuthorization();
+        
+        // IdentityModelEventSource.ShowPII = true;
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -85,6 +128,11 @@ public class Startup
         
         // app.UseHttpsRedirection();
         app.UseRouting();
+        
+        app.UseMiddleware<AuthJwtMiddleware>();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.UseEndpoints(endpoints =>
         {
