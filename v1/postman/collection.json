@@ -22,7 +22,7 @@
 									"",
 									"    const response = pm.response.json();",
 									"    pm.expect(response.access_token).not.be.empty",
-									"    pm.collectionVariables.set(\"authorizationToken\", response.access_token)",
+									"    pm.environment.set(\"authorizationToken\", response.access_token)",
 									"})"
 								],
 								"type": "text/javascript"
@@ -31,60 +31,64 @@
 					],
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "basic",
+							"basic": [
+								{
+								  "key": "username",
+								  "value": "{{clientId}}",
+								  "type": "string"
+								},
+								{
+								  "key": "password",
+								  "value": "{{clientSecret}}",
+								  "type": "string"
+								}
+							  ]
 						},
 						"method": "POST",
 						"header": [],
 						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "scope",
-									"value": "openid",
-									"type": "text"
-								},
-								{
-									"key": "grant_type",
-									"value": "password",
-									"type": "text"
-								},
-								{
-									"key": "username",
-									"value": "{{username}}",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "{{password}}",
-									"type": "text"
-								},
-								{
-									"key": "clientId",
-									"value": "{{clientId}}",
-									"type": "text"
-								},
-								{
-									"key": "clientSecret",
-									"value": "{{clientSecret}}",
-									"type": "text"
-								}
-							]
+						"mode": "urlencoded",
+						"urlencoded": [
+							{
+							"key": "scope",
+							"value": "openid",
+							"type": "text"
+							},
+							{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+							},
+							{
+							"key": "username",
+							"value": "{{username}}",
+							"type": "text"
+							},
+							{
+							"key": "password",
+							"value": "{{password}}",
+							"type": "text"
+							}
+						]
 						},
 						"url": {
-							"raw": "{{identityProviderUrl}}/oauth/token",
-							"host": [
-								"{{identityProviderUrl}}"
-							],
-							"path": [
-								"oauth",
-								"token"
-							]
+						"raw": "{{identityProviderUrl}}/oauth2/default/v1/token",
+						"host": [
+							"{{identityProviderUrl}}"
+						],
+						"path": [
+							"oauth2",
+							"default",
+							"v1",
+							"token"
+						]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "[unauthorize] Получить список рейов",
+					"name": "[unauthorize] Получить список рейсов",
 					"event": [
 						{
 							"listen": "test",
@@ -129,7 +133,7 @@
 					"response": []
 				},
 				{
-					"name": "[success] Получить список рейстов",
+					"name": "[success] Получить список рейсов",
 					"event": [
 						{
 							"listen": "test",
